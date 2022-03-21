@@ -1,0 +1,68 @@
+#!/bin/bash
+# <UDF name="hostname" label="Hostname for system" default="lintoast">
+# <UDF name="go_version" label="Go version to install" default="go1.18">
+# <UDF name="nvim_version" label="NVIM version" default="v0.6.1">
+# <UDF name="nvm_version" label="NVM version, for npm" default="v0.39.1">
+# <UDF name="session_name" label="Name of the session" default="lintoast-remote">
+hostnmectl set-hostname ${hostname}
+
+mkdir -p ~/.config
+mkdir -p ~/kube/
+mkdir -p ~/kube/kubeconfig
+
+sudo apt-get update
+sudo apt-get install -y build-essential curl file git zsh xclip bison golang ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen fzf apt-transport-https ca-certificates gnupg-agent software-properties-common
+
+# Zsh
+if [[ "$SHELL" != "/usr/bin/zsh" ]]; then
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  sudo chsh -s $(which zsh)
+fi
+
+# Tmux
+if [[ ! -d "~/.tmux/plugins/tpm" ]]; then
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+# Go
+if [[ ! -d "~/.gvm/scripts/gvm" ]]; then
+  bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+  source /root/.gvm/scripts/gvm
+  gvm install ${go_version}
+  gvm use go1.18 --default
+fi
+
+# Neovim
+if [[ ! -f  "/build/bin/nvim" ]]; then
+  git clone https://github.com/neovim/neovim
+  cd neovim && git checkout ${nvim_version} && make && make install 
+  mv /build/bin/nvim /usr/bin/nvim
+fi
+ 
+# kubectl
+if [[ ! -f "/usr/local/bin/kubectl" ]]; then
+  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+fi
+
+# npm
+if [[  ! -d "~/.nvm" ]]; then
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${nvm_version}/install.sh | bash
+  source ~/.zshrc
+  nvm install --lts
+  nvm use --lts
+fi 
+
+# tfenv
+if [[ ! -d "~/.tfenv" ]]; then
+  git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+  mkdir -p ~/.local/bin
+  . ~/.profile
+  ln -s ~/.tfenv/bin/* ~/.local/bin
+  tfenv init
+  tfenv install latest
+  tfenv use latest
+fi
+
+# Start session
+tmux new-session -d -s ${session_name}-remote
