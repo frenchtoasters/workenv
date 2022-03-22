@@ -64,5 +64,13 @@ if [[ ! -d "~/.tfenv" ]]; then
   tfenv use latest
 fi
 
+# github
+if [[ ! -f "/usr/local/bin/gh" ]]; then
+  curl -LO https://github.com/cli/cli/releases/download/v${gh_version}/gh_${gh_version}_linux_amd64.tar.gz
+  tar -zxvf gh_${gh_version}_linux_amd64.tar.gz
+  chmod +x ~/gh_${gh_version}_linux_amd64/bin/gh
+  mv ~/gh_${gh_version}_linux_amd64/bin/gh /usr/local/bin/gh
+fi
+
 # Start session
 tmux new-session -d -s ${session_name}-remote

@@ -12,7 +12,8 @@ locals {
   goversion        = "go1.18"
   nvmversion       = "v0.39.1"
   nvim_version     = "v0.6.1"
-  stackscript_data = sensitive(templatefile("${path.module}/stackscriptsetup.sh.tftpl", { session_name = local.session_name, hostname = local.hostname, go_version = local.goversion, nvm_version = local.nvmversion, nvim_version = local.nvim_version }))
+  gh_version       = "2.6.0"
+  stackscript_data = sensitive(templatefile("${path.module}/stackscriptsetup.sh.tftpl", { session_name = local.session_name, hostname = local.hostname, go_version = local.goversion, nvm_version = local.nvmversion, nvim_version = local.nvim_version, gh_version = local.gh_version }))
 }
 
 resource "random_password" "random_pass" {
@@ -67,3 +68,4 @@ resource "linode_nodebalancer_node" "workspace-lb-node" {
   label           = local.session_name
   weight          = 100
 }
+
