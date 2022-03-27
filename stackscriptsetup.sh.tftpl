@@ -72,5 +72,17 @@ if [[ ! -f "/usr/local/bin/gh" ]]; then
   mv ~/gh_${gh_version}_linux_amd64/bin/gh /usr/local/bin/gh
 fi
 
+# kustomize
+if [[ ! -f "/usr/local/bin/kustomize" ]]; then
+  curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+  mv ~/kustomize /usr/local/bin/kustomize
+fi
+
+# kube-builder
+if [[ ! -f "/usr/local/bin/kubebuilder" ]]; then
+  curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(go env GOOS)/$(go env GOARCH)
+  chmod +x kubebuilder && mv kubebuilder /usr/local/bin/
+fi
+
 # Start session
 tmux new-session -d -s ${session_name}-remote
