@@ -1,9 +1,14 @@
 variable "ssh_key_pub" {}
 variable "token" {}
+variable "gh_token" {}
 variable "region" {}
 
 provider "linode" {
   token = var.token
+}
+
+provider "github" {
+  token = var.gh_token
 }
 
 locals {
@@ -67,5 +72,14 @@ resource "linode_nodebalancer_node" "workspace-lb-node" {
   address         = "${linode_instance.workspace.private_ip_address}:22"
   label           = local.session_name
   weight          = 100
+}
+
+resource "tls_private_key" "lintoast-key" {
+  algorithm = "RSA"
+}
+
+resource "github_user_ssh_key" "lintoast-ssh" {
+  title = "${local.session_name}-ssh"
+  key   = tls_private_key.lintoast-key.public_key_openssh
 }
 

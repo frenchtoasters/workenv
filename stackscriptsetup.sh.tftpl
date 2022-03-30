@@ -11,7 +11,7 @@ mkdir -p ~/kube/
 mkdir -p ~/kube/kubeconfig
 
 sudo apt-get update
-sudo apt-get install -y build-essential curl file git zsh xclip bison golang ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen fzf apt-transport-https ca-certificates gnupg-agent software-properties-common
+sudo apt-get install -y build-essential curl file git zsh xclip bison golang ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen fzf apt-transport-https ca-certificates gnupg-agent software-properties-common python3-pip
 
 # Zsh
 if [[ "$SHELL" != "/usr/bin/zsh" ]]; then
@@ -37,6 +37,11 @@ if [[ ! -f  "/build/bin/nvim" ]]; then
   git clone https://github.com/neovim/neovim
   cd neovim && git checkout ${nvim_version} && make && make install 
   mv /build/bin/nvim /usr/bin/nvim
+  git clone https://github.com/frenchtoasters/dotfiles.git
+  mv ~/dotfiles ~/.config/nvim/
+  cp ~/.config/nvim/.zshrc-copy ~/.zshrc
+  cp ~/.config/nvim/.tmux.conf ~/.tmux.conf
+  cd /root
 fi
  
 # kubectl
@@ -82,6 +87,11 @@ fi
 if [[ ! -f "/usr/local/bin/kubebuilder" ]]; then
   curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/linux/amd64
   chmod +x kubebuilder && mv kubebuilder /usr/local/bin/
+fi
+
+# linode-cli
+if [[ ! -f "/usr/local/bin/linode-cli" ]]; then
+  python3 -m pip install linode-cli
 fi
 
 # Start session
