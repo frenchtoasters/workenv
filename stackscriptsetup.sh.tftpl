@@ -4,7 +4,7 @@
 # <UDF name="nvim_version" label="NVIM version" default="v0.6.1">
 # <UDF name="nvm_version" label="NVM version, for npm" default="v0.39.1">
 # <UDF name="session_name" label="Name of the session" default="lintoast-remote">
-hostnmectl set-hostname ${hostname}
+hostnamectl set-hostname ${hostname}
 
 mkdir -p ~/.config
 mkdir -p ~/kube/
@@ -25,11 +25,12 @@ if [[ ! -d "~/.tmux/plugins/tpm" ]]; then
 fi
 
 # Go
-if [[ ! -d "~/.gvm/scripts/gvm" ]]; then
+if [[ ! -d "~/.gvm" ]]; then
   bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
-  source /root/.gvm/scripts/gvm
+  export GVM_ROOT=/root/.gvm
+  source $GVM_ROOT/scripts/gvm-default
   gvm install ${go_version}
-  gvm use go1.18 --default
+  gvm use ${go_version} --default
 fi
 
 # Neovim
@@ -37,13 +38,17 @@ if [[ ! -f  "/build/bin/nvim" ]]; then
   git clone https://github.com/neovim/neovim
   cd neovim && git checkout ${nvim_version} && make && make install 
   mv /build/bin/nvim /usr/bin/nvim
+  cd ~
+fi
+
+if [[ ! -d "~/.config/nvim" ]]; then
   git clone https://github.com/frenchtoasters/dotfiles.git
-  mv ~/dotfiles ~/.config/nvim/
+  cd ~
+  mv ~/dotfiles ~/.config/nvim
   cp ~/.config/nvim/.zshrc-copy ~/.zshrc
   cp ~/.config/nvim/.tmux.conf ~/.tmux.conf
-  cd /root
 fi
- 
+
 # kubectl
 if [[ ! -f "/usr/local/bin/kubectl" ]]; then
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -64,6 +69,7 @@ if [[ ! -d "~/.tfenv" ]]; then
   mkdir -p ~/.local/bin
   . ~/.profile
   ln -s ~/.tfenv/bin/* ~/.local/bin
+  source ~/.zshrc
   tfenv init
   tfenv install latest
   tfenv use latest

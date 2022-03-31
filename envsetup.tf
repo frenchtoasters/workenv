@@ -2,6 +2,7 @@ variable "ssh_key_pub" {}
 variable "token" {}
 variable "gh_token" {}
 variable "region" {}
+variable "ssh_priv_key" {}
 
 provider "linode" {
   token = var.token
@@ -51,6 +52,7 @@ resource "linode_instance" "workspace" {
     "nvim_version" = local.nvim_version
   }
   private_ip = true
+
 }
 
 resource "linode_nodebalancer" "workspace-lb" {
@@ -83,3 +85,34 @@ resource "github_user_ssh_key" "lintoast-ssh" {
   key   = tls_private_key.lintoast-key.public_key_openssh
 }
 
+resource "null_resource" "add_ssh_priv" {
+  triggers = {
+    priv_key = tls_private_key.lintoast-key.private_key_pem
+  }
+  provisioner "file" {
+    content     = tls_private_key.lintoast-key.private_key_pem
+    destination = "/root/.ssh/id_rsa"
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = base64decode(var.ssh_priv_key)
+      host        = linode_instance.workspace.ip_address
+    }
+  }
+}
+
+resource "null_resource" "add_ssh_pub" {
+  triggers = {
+    pub_key = tls_private_key.lintoast-key.public_key_pem
+  }
+  provisioner "file" {
+    content     = tls_private_key.lintoast-key.public_key_pem
+    destination = "/root/.ssh/id_rsa.pub"
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = base64decode(var.ssh_priv_key)
+      host        = linode_instance.workspace.ip_address
+    }
+  }
+}
