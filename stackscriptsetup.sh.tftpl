@@ -1,9 +1,10 @@
 #!/bin/bash
 # <UDF name="hostname" label="Hostname for system" default="lintoast">
-# <UDF name="go_version" label="Go version to install" default="go1.18">
-# <UDF name="nvim_version" label="NVIM version" default="v0.6.1">
-# <UDF name="nvm_version" label="NVM version, for npm" default="v0.39.1">
-# <UDF name="session_name" label="Name of the session" default="lintoast-remote">
+# <UDF name="go_version" label="Go version to install" default="go1.18"/>
+# <UDF name="nvim_version" label="NVIM version" default="v0.6.1"/>
+# <UDF name="nvm_version" label="NVM version, for npm" default="v0.39.1"/>
+# <UDF name="session_name" label="Name of the session" default="lintoast-remote"/>
+# <UDF name="gh_version" label="gh version for gh-cli" default="2.6.0"/>
 hostnamectl set-hostname ${hostname}
 
 mkdir -p ~/.config
