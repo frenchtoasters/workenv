@@ -31,6 +31,8 @@ locals {
   )
 }
 
+data "linode_profile" "me" {}
+
 resource "random_password" "random_pass" {
   length  = 35
   special = true
@@ -46,22 +48,53 @@ resource "linode_stackscript" "workspace-terraform" {
 }
 
 resource "linode_instance" "workspace" {
-  image           = "linode/ubuntu20.04"
-  label           = local.session_name
-  region          = var.region
-  type            = "g6-standard-4"
-  authorized_keys = [var.ssh_key_pub]
-  root_pass       = random_password.random_pass.result
-  stackscript_id  = linode_stackscript.workspace-terraform.id
-  stackscript_data = {
-    "hostname"     = local.hostname
-    "go_version"   = local.goversion
-    "nvm_version"  = local.nvmversion
-    "session_name" = local.session_name
-    "nvim_version" = local.nvim_version
+  label  = local.session_name
+  region = var.region
+  type   = "g6-standard-4"
+
+  disk {
+    label            = "boot"
+    size             = 30000
+    filesystem       = "ext4"
+    image            = "linode/ubuntu20.04"
+    authorized_users = [data.linode_profile.me.username]
+    root_pass        = random_password.random_pass.result
+    stackscript_id   = linode_stackscript.workspace-terraform.id
+    stackscript_data = {
+      "hostname"     = local.hostname
+      "go_version"   = local.goversion
+      "nvm_version"  = local.nvmversion
+      "session_name" = local.session_name
+      "nvim_version" = local.nvim_version
+    }
   }
+
+  config {
+    label  = "boot_config"
+    kernel = "linode/latest-64bit"
+    devices {
+      sda {
+        disk_label = "boot"
+      }
+      sdb {
+        volume_id = linode_volume.home_dir.id
+      }
+    }
+    root_device = "/dev/sda"
+  }
+  boot_config_label = "boot_config"
+
   private_ip = true
 
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "linode_volume" "home_dir" {
+  label  = "home_dir"
+  size   = 100
+  region = var.region
 }
 
 resource "linode_nodebalancer" "workspace-lb" {
