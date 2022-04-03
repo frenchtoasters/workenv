@@ -26,3 +26,10 @@ resource "kubernetes_namespace" "workspace" {
     name = "${local.session_name}-ns"
   }
 }
+
+resource "kubernetes_manifest" "test_pod" {
+  manifest = yamldecode(templatefile("${path.module}/manifest.yaml.tftpl", {
+    name  = "${local.session_name}",
+    image = "nginx"
+  }))
+}
