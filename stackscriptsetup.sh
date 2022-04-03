@@ -123,3 +123,15 @@ if [[ ! -f "/etc/systemd/system/${session_name}.service" ]]; then
 	systemctl enable ${session_name}.service
 	systemctl start ${session_name}.service
 fi
+
+mkdir -p /keep
+if [[ mount /dev/sdb /keep ]]; then
+	touch /keep/existed
+	echo "EXISTED" > /keep/existed
+else
+	mkfs.ext4 /dev/sdb
+	mount /dev/sdb /keep
+	cp -r ~/.config/nvim/* /keep
+fi
+echo "/dev/sdb /keep ext4 defaults 0 2" >> /etc/fstab
+

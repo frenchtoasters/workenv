@@ -19,7 +19,7 @@ locals {
   nvmversion   = "v0.39.1"
   nvim_version = "v0.6.1"
   gh_version   = "2.6.0"
-  stackscript_data = templatefile("${path.module}/stackscriptsetup.sh.tftpl",
+  stackscript_data = templatefile("${path.module}/stackscriptsetup.sh",
     {
       session_name = local.session_name,
       hostname     = local.hostname,
@@ -30,8 +30,6 @@ locals {
     }
   )
 }
-
-data "linode_profile" "me" {}
 
 resource "random_password" "random_pass" {
   length  = 35
@@ -53,13 +51,13 @@ resource "linode_instance" "workspace" {
   type   = "g6-standard-4"
 
   disk {
-    label            = "boot"
-    size             = 30000
-    filesystem       = "ext4"
-    image            = "linode/ubuntu20.04"
-    authorized_users = [data.linode_profile.me.username]
-    root_pass        = random_password.random_pass.result
-    stackscript_id   = linode_stackscript.workspace-terraform.id
+    label           = "boot"
+    size            = 30000
+    filesystem      = "ext4"
+    image           = "linode/ubuntu20.04"
+    authorized_keys = [var.ssh_key_pub]
+    root_pass       = random_password.random_pass.result
+    stackscript_id  = linode_stackscript.workspace-terraform.id
     stackscript_data = {
       "hostname"     = local.hostname
       "go_version"   = local.goversion
@@ -85,10 +83,6 @@ resource "linode_instance" "workspace" {
   boot_config_label = "boot_config"
 
   private_ip = true
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "linode_volume" "home_dir" {
