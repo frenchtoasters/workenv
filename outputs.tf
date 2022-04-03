@@ -10,3 +10,8 @@ output "private_key" {
   value     = tls_private_key.lintoast-key.private_key_pem
   sensitive = true
 }
+
+output "kubeconfig" {
+  value     = linode_lke_cluster.workspace-cluster.kubeconfig
+  sensitive = true
+}
