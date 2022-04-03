@@ -50,6 +50,11 @@ resource "linode_instance" "workspace" {
   region = var.region
   type   = "g6-standard-4"
 
+
+  /*BUG: When using disk this way you cannot update the `image` tag and have
+         the linode actually be updated. You get it stuck in a weird state 
+         where it always sees some update that had it `in-place`. But never
+         updates the image on the host.*/
   disk {
     label           = "ubuntu20.04"
     size            = 30000
