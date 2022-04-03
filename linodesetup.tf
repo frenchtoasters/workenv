@@ -41,7 +41,7 @@ resource "linode_stackscript" "workspace-terraform" {
   label       = "workspace-terraform-${local.session_name}"
   description = "workspace deployed via terraform"
   script      = local.stackscript_data
-  images      = ["linode/ubuntu20.04"]
+  images      = ["linode/ubuntu20.04", "linode/ubuntu21.10"]
   rev_note    = "initial terraform version"
 }
 
