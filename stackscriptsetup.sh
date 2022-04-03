@@ -12,7 +12,7 @@ mkdir -p ~/kube/
 mkdir -p ~/kube/kubeconfig
 
 sudo apt-get update
-sudo apt-get install -y build-essential curl file git zsh xclip bison golang ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen fzf apt-transport-https ca-certificates gnupg-agent software-properties-common python3-pip
+sudo apt-get install -y build-essential curl file git zsh xclip bison golang ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip doxygen fzf apt-transport-https ca-certificates gnupg-agent software-properties-common python3-pip jq
 
 # Zsh
 if [[ "$SHELL" != "/usr/bin/zsh" ]]; then
@@ -125,7 +125,9 @@ if [[ ! -f "/etc/systemd/system/${session_name}.service" ]]; then
 fi
 
 mkdir -p /keep
-if [[ mount /dev/sdb /keep ]]; then
+echo "/dev/sdb /keep ext4 defaults 0 2" >> /etc/fstab
+
+if mount -a; then
 	touch /keep/existed
 	echo "EXISTED" > /keep/existed
 else
@@ -133,5 +135,4 @@ else
 	mount /dev/sdb /keep
 	cp -r ~/.config/nvim/* /keep
 fi
-echo "/dev/sdb /keep ext4 defaults 0 2" >> /etc/fstab
 

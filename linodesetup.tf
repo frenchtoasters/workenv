@@ -51,7 +51,7 @@ resource "linode_instance" "workspace" {
   type   = "g6-standard-4"
 
   disk {
-    label           = "boot"
+    label           = "ubuntu20.04"
     size            = 30000
     filesystem      = "ext4"
     image           = "linode/ubuntu20.04"
@@ -68,11 +68,11 @@ resource "linode_instance" "workspace" {
   }
 
   config {
-    label  = "boot_config"
+    label  = "04config"
     kernel = "linode/latest-64bit"
     devices {
       sda {
-        disk_label = "boot"
+        disk_label = "ubuntu20.04"
       }
       sdb {
         volume_id = linode_volume.home_dir.id
@@ -80,7 +80,7 @@ resource "linode_instance" "workspace" {
     }
     root_device = "/dev/sda"
   }
-  boot_config_label = "boot_config"
+  boot_config_label = "04config"
 
   private_ip = true
 }
@@ -152,3 +152,4 @@ resource "null_resource" "add_ssh_pub" {
     }
   }
 }
+
