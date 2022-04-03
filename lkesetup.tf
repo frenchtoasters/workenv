@@ -17,8 +17,8 @@ resource "linode_lke_cluster" "workspace-cluster" {
 
 provider "kubernetes" {
   host                   = local.kubeconfig.clusters[0].cluster.server
-  token                  = yamldecode(base64decode(linode_lke_cluster.workspace-cluster.kubeconfig)).users[0].user.token
-  cluster_ca_certificate = base64decode(yamldecode(base64decode(linode_lke_cluster.workspace-cluster.kubeconfig)).clusters[0].cluster.certificate-authority-data)
+  token                  = local.kubeconfig.users[0].user.token
+  cluster_ca_certificate = base64decode(local.kubeconfig.clusters[0].cluster.certificate-authority-data)
 }
 
 resource "kubernetes_namespace" "workspace" {
