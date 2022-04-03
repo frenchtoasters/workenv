@@ -2,7 +2,6 @@ locals {
   kubeconfig = yamldecode(base64decode(linode_lke_cluster.workspace-cluster.kubeconfig))
 }
 
-
 resource "linode_lke_cluster" "workspace-cluster" {
   label       = "${local.session_name}-cluster"
   k8s_version = "1.22"
