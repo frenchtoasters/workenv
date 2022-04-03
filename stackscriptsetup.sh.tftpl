@@ -98,5 +98,28 @@ if [[ ! -f "/usr/local/bin/linode-cli" ]]; then
   python3 -m pip install linode-cli
 fi
 
-# Start session
-tmux new-session -d -s ${session_name}-remote
+# kind
+if [[ ! -f "/usr/local/bin/kind" ]]; then
+  curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.12.0/kind-linux-amd64
+  chmod +x ./kind
+  mv ./kind /usr/local/bin/kind
+fi
+
+# Create session service
+if [[ ! -f "/etc/systemd/system/${session_name}.service" ]]; then
+	echo "[Unit]
+		Description=tmux ${session_name} service
+
+		[Service]
+		Type=forking
+		User=root
+		ExecStart=/usr/bin/tmux new-session -d -s ${session_name}-remote
+		ExecStop=/usr/bin/tmux kill-session -t ${session_name}-remote
+
+		[Install]
+		WantedBy=multi-user.target" > ${session_name}.service
+	mv ./${session_name}.service /etc/systemd/system/
+	systemctl daemon-reload
+	systemctl enable ${session_name}.service
+	systemctl start ${session_name}.service
+fi
