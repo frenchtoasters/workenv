@@ -26,8 +26,17 @@ resource "kubernetes_namespace" "workspace" {
   }
 }
 
-resource "kubernetes_manifest" "test_pod" {
-  manifest = yamldecode(templatefile("${path.module}/manifest.yaml", {
+resource "kubernetes_namespace" "deployment_ns" {
+  metadata {
+    name = "workspace"
+  }
+}
+
+/* Manifest have to all be seperate, cannot have multiple in one file. 
+   Because if yamldecode is only loading into one variable and not a map of
+   vvariables.*/
+resource "kubernetes_manifest" "single_manifest" {
+  manifest = yamldecode(templatefile("${path.module}/single_manifest.yaml", {
     name  = "${local.session_name}",
     image = "nginx"
   }))
