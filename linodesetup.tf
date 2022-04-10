@@ -52,9 +52,15 @@ resource "linode_instance" "workspace" {
 
 
   /*BUG: When using disk this way you cannot update the `image` tag and have
-         the linode actually be updated. You get it stuck in a weird state 
+         the linode actually be updated. You get it stuck in a weird state
          where it always sees some update that had it `in-place`. But never
          updates the image on the host.*/
+  /*DETAILS: They are ignoring this case in the terraform provider cause of
+             what the api returns. Also image change requires new disk create
+             so that means you would have to power off to delete the old. The
+             provider would need to create the new disk first then add it to
+             the linode. After that it would need to power off the linode and
+             delete the old disk.*/
   disk {
     label           = "ubuntu21.10"
     size            = 30000
