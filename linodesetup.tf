@@ -56,10 +56,10 @@ resource "linode_instance" "workspace" {
          where it always sees some update that had it `in-place`. But never
          updates the image on the host.*/
   disk {
-    label           = "ubuntu20.04"
+    label           = "ubuntu21.10"
     size            = 30000
     filesystem      = "ext4"
-    image           = "linode/ubuntu20.04"
+    image           = "linode/ubuntu21.10"
     authorized_keys = [var.ssh_key_pub]
     root_pass       = random_password.random_pass.result
     stackscript_id  = linode_stackscript.workspace-terraform.id
@@ -77,7 +77,7 @@ resource "linode_instance" "workspace" {
     kernel = "linode/latest-64bit"
     devices {
       sda {
-        disk_label = "ubuntu20.04"
+        disk_label = "ubuntu21.10"
       }
       sdb {
         volume_id = linode_volume.home_dir.id
