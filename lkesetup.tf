@@ -39,7 +39,7 @@ resource "kubernetes_namespace" "deployment_ns" {
 }
 
 /* Manifest have to all be seperate, cannot have multiple in one file. 
-   Because if yamldecode is only loading into one variable and not a map of
+   Because if `yamldecode` is only loading into one variable and not a map of
    variables.*/
 resource "kubernetes_manifest" "single_manifest" {
   manifest = yamldecode(templatefile("${path.module}/single_manifest.yaml", {
