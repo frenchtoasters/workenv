@@ -52,6 +52,7 @@ resource "kubernetes_manifest" "single_manifest" {
   ]
 }
 
+/* Use a helm chart */
 provider "helm" {
   kubernetes {
     host                   = local.kubeconfig.clusters[0].cluster.server
@@ -60,6 +61,7 @@ provider "helm" {
   }
 }
 
+/* Work with kubectl */
 provider "kubectl" {
   host                   = local.kubeconfig.clusters[0].cluster.server
   token                  = local.kubeconfig.users[0].user.token
@@ -67,6 +69,7 @@ provider "kubectl" {
   load_config_file       = false
 }
 
+/* Apply single yaml doc with multiple yaml resources defined */
 data "kubectl_file_documents" "multi_doc" {
   content = templatefile("${path.module}/multi_manifest.yaml", {
     name  = "${local.session_name}",
@@ -85,12 +88,39 @@ resource "kubectl_manifest" "multi_manifests" {
   ]
 }
 
+/* Apply a directory of manifests templates, passing terraform resource 
+   information */
 data "kubectl_path_documents" "multi_dir" {
   pattern = "${path.module}/templatedir/*.yaml"
   vars = {
     name  = "${local.session_name}",
     image = "nginx"
   }
+}
+
+/* You can save the templated manifests to disk for analysis. */
+resource "local_file" "file_dir_temp" {
+  count    = length(data.kubectl_path_documents.multi_dir.documents)
+  content  = element(data.kubectl_path_documents.multi_dir.documents, count.index)
+  filename = "${path.module}/templatedir-temp/${count.index}.yaml"
+}
+
+/* Load a directory of templated manifests  */
+data "kubectl_path_documents" "temp_multi_dir" {
+  pattern = "${path.module}/templatedir-temp/*.yaml"
+  depends_on = [
+    local_file.file_dir_temp
+  ]
+}
+
+/* Apply the loaded dirctory of manifests */
+resource "kubectl_manifest" "dir_manifests" {
+  count     = length(data.kubectl_path_documents.multi_dir.documents)
+  yaml_body = element(data.kubectl_path_documents.temp_multi_dir.documents, count.index)
+  depends_on = [
+    kubernetes_namespace.workspace,
+    data.kubectl_path_documents.temp_multi_dir
+  ]
 }
 
 /* This will create all the documents in a directory, with the condition that
@@ -116,10 +146,3 @@ data "kubectl_path_documents" "multi_dir" {
 /*   ] */
 /* } */
 
-resource "kubectl_manifest" "dir_manifests" {
-  count     = length(data.kubectl_path_documents.multi_dir.documents)
-  yaml_body = element(data.kubectl_path_documents.multi_dir.documents, count.index)
-  depends_on = [
-    kubernetes_namespace.workspace
-  ]
-}

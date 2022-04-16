@@ -164,3 +164,18 @@ resource "null_resource" "add_ssh_pub" {
   }
 }
 
+resource "linode_firewall" "workspace_firewall" {
+  label = "${local.session_name}-firewall"
+  tags  = ["${local.session_name}"]
+  inbound {
+    label    = "allow-ssh"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ports    = "22"
+    ipv4     = ["${linode_nodebalancer.workspace-lb.ipv4}/30"]
+  }
+  inbound_policy  = "DROP"
+  outbound_policy = "ACCEPT"
+
+  linodes = [linode_instance.workspace.id]
+}
