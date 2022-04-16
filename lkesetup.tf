@@ -84,22 +84,38 @@ resource "kubectl_manifest" "multi_manifests" {
   ]
 }
 
-module "template_files" {
-  source = "hashicorp/dir/template"
-
-  base_dir = "${path.module}/templatedir/"
-  template_vars = {
+data "kubectl_path_documents" "multi_dir" {
+  pattern = "${path.module}/templatedir/*.yaml"
+  vars = {
     name  = "${local.session_name}",
     image = "nginx"
   }
 }
 
-data "kubectl_file_documents" "multi_dir" {
-  for_each = module.template_files.files
-  content  = yamldecode(each.value.content)
-  depends_on = [
-    kubernetes_namespace.workspace
-  ]
+/* This will create all the documents in a directory, with the condition that
+   it will not create multi-doc yaml files correctly. It will only create the
+   first yaml doc in the file. Took way to long to figure out though so im 
+   leaving it here.*/
+/* data "kubectl_file_documents" "multi_dir" { */
+/*   for_each = module.template_files.files */
+/*   content  = each.value.content */
+/*   depends_on = [ */
+/*     kubernetes_namespace.workspace */
+/*   ] */
+/* } */
+
+/* resource "kubectl_manifest" "dir_manifests" { */
+/* This part especially */
+/*   for_each = { */
+/*     for doc in data.kubectl_file_documents.multi_dir : doc.id => doc */
+/*   } */
+/*   yaml_body = each.value.manifests */
+/*   depends_on = [ */
+/*     kubernetes_namespace.workspace */
+/*   ] */
+/* } */
+
+resource "kubectl_manifest" "dir_manifests" {
+  count     = length(data.kubectl_path_documents.multi_dir.documents)
+  yaml_body = element(data.kubectl_path_documents.multi_dir.documents, count.index)
 }
-
-
