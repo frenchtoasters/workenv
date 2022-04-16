@@ -172,7 +172,7 @@ resource "linode_firewall" "workspace_firewall" {
     action   = "ACCEPT"
     protocol = "TCP"
     ports    = "22"
-    ipv4     = ["${linode_nodebalancer.workspace-lb.ipv4}/30"]
+    ipv4     = ["${linode_nodebalancer.workspace-lb.ipv4}/32"]
   }
   inbound_policy  = "DROP"
   outbound_policy = "ACCEPT"

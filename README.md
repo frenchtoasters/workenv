@@ -28,5 +28,4 @@ This project deployes my current working environment.
 
 ## TODO
 * Add firewall to linode to only allow ssh access from Loadbalancer.
-	* BUG: Seems it doesnt like my syntax of lb.ipv4/30 for the address to add 
-	  for the firewall.
+	* Need to figure out why im hitting this bug `kex_exchange_identification: Connection closed by remote host`
