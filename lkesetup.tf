@@ -64,6 +64,7 @@ provider "kubectl" {
   host                   = local.kubeconfig.clusters[0].cluster.server
   token                  = local.kubeconfig.users[0].user.token
   cluster_ca_certificate = base64decode(local.kubeconfig.clusters[0].cluster.certificate-authority-data)
+  load_config_file       = false
 }
 
 data "kubectl_file_documents" "multi_doc" {
@@ -118,4 +119,7 @@ data "kubectl_path_documents" "multi_dir" {
 resource "kubectl_manifest" "dir_manifests" {
   count     = length(data.kubectl_path_documents.multi_dir.documents)
   yaml_body = element(data.kubectl_path_documents.multi_dir.documents, count.index)
+  depends_on = [
+    kubernetes_namespace.workspace
+  ]
 }
