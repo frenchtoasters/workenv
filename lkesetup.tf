@@ -146,3 +146,28 @@ resource "kubectl_manifest" "dir_manifests" {
 /*   ] */
 /* } */
 
+/* You can run kustomize on the dir and apply it output */
+provider "kustomization" {
+  kubeconfig_raw = base64decode(linode_lke_cluster.workspace-cluster.kubeconfig)
+}
+
+resource "local_file" "kustomization" {
+  content  = <<-EOT
+		bases:
+		- "${path.module}/templatedir-temp/"
+	EOT
+  filename = "${path.module}/templatedir-temp/kustomization.yaml"
+}
+
+data "kustomization_overlay" "prod" {
+  common_labels = {
+    app = "prod"
+  }
+  resources = [
+    "${path.module}/templatedir-temp/"
+  ]
+  depends_on = [
+    local_file.file_dir_temp,
+    local_file.kustomization
+  ]
+}
